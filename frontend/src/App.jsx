@@ -7,86 +7,57 @@ import MainLayout from './components/MainLayout'
 import Profile from './components/Profile'
 import Signup from './components/Signup'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { io } from "socket.io-client";
 import { useDispatch, useSelector } from 'react-redux'
-import { setSocket } from './redux/socketSlice'
+
 import { setOnlineUsers } from './redux/chatSlice'
 import { setLikeNotification } from './redux/rtnSlice'
 import ProtectedRoutes from './components/ProtectedRoutes'
 
+import { socket } from "./socket";
 
 const browserRouter = createBrowserRouter([
   {
     path: "/",
     element: <ProtectedRoutes><MainLayout /></ProtectedRoutes>,
     children: [
-      {
-        path: '/',
-        element: <ProtectedRoutes><Home /></ProtectedRoutes>
-      },
-      {
-        path: '/profile/:id',
-        element: <ProtectedRoutes> <Profile /></ProtectedRoutes>
-      },
-      {
-        path: '/account/edit',
-        element: <ProtectedRoutes><EditProfile /></ProtectedRoutes>
-      },
-      {
-        path: '/chat',
-        element: <ProtectedRoutes><ChatPage /></ProtectedRoutes>
-      },
+      { path: "/", element: <ProtectedRoutes><Home /></ProtectedRoutes> },
+      { path: "/profile/:id", element: <ProtectedRoutes><Profile /></ProtectedRoutes> },
+      { path: "/account/edit", element: <ProtectedRoutes><EditProfile /></ProtectedRoutes> },
+      { path: "/chat", element: <ProtectedRoutes><ChatPage /></ProtectedRoutes> },
     ]
   },
-  {
-    path: '/login',
-    element: <Login />
-  },
-  {
-    path: '/signup',
-    element: <Signup />
-  },
+  { path: '/login', element: <Login /> },
+  { path: '/signup', element: <Signup /> },
 ])
 
 function App() {
+
   const { user } = useSelector(store => store.auth);
-  const { socket } = useSelector(store => store.socketio);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (user) {
-      const socketio = io('http://localhost:8000', {
-        query: {
-          userId: user?._id
-        },
-        transports: ['websocket']
-      });
-      dispatch(setSocket(socketio));
+      socket.connect();
 
-      // listen all the events
-      socketio.on('getOnlineUsers', (onlineUsers) => {
+      socket.emit("registerUser", user._id);
+
+      socket.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
 
-      socketio.on('notification', (notification) => {
+      socket.on("notification", (notification) => {
         dispatch(setLikeNotification(notification));
       });
 
       return () => {
-        socketio.close();
-        dispatch(setSocket(null));
-      }
-    } else if (socket) {
-      socket.close();
-      dispatch(setSocket(null));
+        socket.disconnect();
+      };
+    } else {
+      socket.disconnect();
     }
-  }, [user, dispatch]);
+  }, [user]);
 
-  return (
-    <>
-      <RouterProvider router={browserRouter} />
-    </>
-  )
+  return <RouterProvider router={browserRouter} />
 }
 
 export default App
