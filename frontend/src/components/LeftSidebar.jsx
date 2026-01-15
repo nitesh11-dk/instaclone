@@ -50,10 +50,10 @@ const LeftSidebar = () => {
 
     const sidebarItems = [
         { icon: <Home />, text: "Home" },
-        { icon: <Search />, text: "Search" },
-        { icon: <TrendingUp />, text: "Explore" },
+        // { icon: <Search />, text: "Search" },
+        // { icon: <TrendingUp />, text: "Explore" },
         { icon: <MessageCircle />, text: "Messages" },
-        { icon: <Heart />, text: "Notifications" },
+        // { icon: <Heart />, text: "Notifications" },
         { icon: <PlusSquare />, text: "Create" },
         {
             icon: (
@@ -69,7 +69,7 @@ const LeftSidebar = () => {
     return (
         <div className='fixed top-0 z-10 left-0 px-4 border-r border-gray-300 w-[16%] h-screen'>
             <div className='flex flex-col'>
-                <h1 className='my-8 pl-3 font-bold text-xl'>LOGO</h1>
+                <h1 className='my-8 pl-3 font-bold text-xl'></h1>
                 <div>
                     {
                         sidebarItems.map((item, index) => {
